@@ -3,6 +3,7 @@
 This unfinished Ansible role is a WIP, I'm not sure to complete one day, but who knows? I publish it anyway for archive, it could serve as a starting point to install [Eclim](http://eclim.org).
 
 **All further notes are written after only some hours experiencing Eclim.**
+
 [Eclim's contributors](https://github.com/ervandew/eclim/graphs/contributors) do a great job, I've seen great videos on YT of users enjoying it, so I'm convinced with a better knowledge of this tool and more time to spend on its settings, it can be a wonderful and powerful source code editor.
 ---
 
