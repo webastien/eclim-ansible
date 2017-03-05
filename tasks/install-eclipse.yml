@@ -1,0 +1,46 @@
+- name: Check if Eclipse has already been installed in a previous provisioning
+  stat: path=/opt/eclipse
+  register: eclipse_installed
+
+- name:     Define the path where Eclipse tarball will be downloaded
+  set_fact: dlPath="{{ configuration.vm.dlFolder }}/eclipse.tar.gz"
+  when:     not eclipse_installed.stat.exists
+
+- name: Check if Eclipse tarball has already been downloaded
+  stat: path="{{ dlPath }}"
+  when: not eclipse_installed.stat.exists
+  register: eclipse_downloaded
+
+- name:    Download Eclipse tarball
+  get_url: url="http://mirrors.nic.cz/eclipse/technology/epp/downloads/release/neon/1a/eclipse-java-neon-1a-linux-gtk-x86_64.tar.gz" dest="{{ dlPath }}"
+  when:    not eclipse_installed.stat.exists and not eclipse_downloaded.stat.exists
+
+- name: Check if Eclipse tarball has already been uncompressed
+  stat: path="{{ configuration.vm.dlFolder }}/eclipse"
+  when: not eclipse_installed.stat.exists
+  register: eclipse_uncompressed
+
+- name:      Unarchive Eclipse tarball
+  unarchive: src={{ dlPath }} dest={{ configuration.vm.dlFolder }} copy=no
+  when:      not eclipse_installed.stat.exists and not eclipse_uncompressed.stat.exists
+
+# NOTE: Can't use Ansible module "copy" with "remote=true" because it doesn't support recursive
+- name:   Copy Eclipse directory to its final location
+  shell:  cp -r {{ configuration.vm.dlFolder }}/eclipse /opt/eclipse
+  when:   not eclipse_installed.stat.exists
+  become: true
+
+- name:   Give ownership of Eclipse folder to vagrant user
+  file:   path=/opt/eclipse owner="{{ ansible_env.USER }}" group="{{ ansible_env.USER }}" recurse=true
+  when:   not eclipse_installed.stat.exists
+  become: true
+
+- name: Check if Eclipse already have PHP support
+  find: path=/opt/eclipse/plugins patterns=org.eclipse.php.*
+  register: eclipse_php
+
+- name:  Install PHP support in Eclipse
+  shell: DISPLAY=:1 /opt/eclipse/eclipse -clean -purgeHistory -nosplash -consolelog -debug -application org.eclipse.equinox.p2.director \
+          -repository http://download.eclipse.org/releases/neon -installIU org.eclipse.php.feature.group
+  when:  eclipse_php.matched == 0
+

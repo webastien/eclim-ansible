@@ -1,0 +1,21 @@
+- name:    Java8 installation...
+  include: install-java8.yml
+  become:  true
+
+- name:    Eclipse installation...
+  include: install-eclipse.yml
+
+# Remember to install Eclim AFTER plugins are installed
+- name:    Eclim installation...
+  include: install-eclim.yml
+
+- name:       Daemons installation...
+  include:    install-daemon.yml
+  with_items: [ xvfb, eclim ]
+  become:     true
+
+# To test all is OK, launch vi and exec ":PingEclim" for example.
+# If the daemon is detected, you can exec ":ProjectCreate <path-in-eclipse-workspace-to-a-new-project-dir> -n php"
+# If you receive an error "unknow php alias", then Eclipse PHP support is broken
+# Otherwise, try editing a PHP file and type <CTRL-X><CTRL-U> to autocomplete
+

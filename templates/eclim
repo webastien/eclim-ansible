@@ -1,0 +1,30 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          eclim
+# Required-Start:    $local_fs $network $syslog xvfb
+# Required-Stop:     $local_fs $network $syslog xvfb
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Eclim Daemon
+# Description:       Manage Eclim Daemon status (start / stop / restart)
+### END INIT INFO
+
+ECLIM=/opt/eclipse/eclim
+ECLIMD=/opt/eclipse/eclimd
+ECLIM_UID=$(stat -c '%U' $ECLIM)
+ECLIM_ARGS="-b -Xmx256M"
+ECLIM_REGEX="^\s*\{\"eclim\":\"[0-9\.]+\",\"eclipse\":\"[0-9\.]+\"\}\s*$"
+
+eclim_running() {
+  [[ $(/sbin/runuser $ECLIM_UID -c "$ECLIM -command ping") =~ $ECLIM_REGEX ]] && return 0 || return 1
+}
+
+case "$1" in
+  start) if !(eclim_running); then /sbin/runuser $ECLIM_UID -c "DISPLAY=:1 $ECLIMD $ECLIM_ARGS"; fi ;;
+  stop)  if  (eclim_running); then /sbin/runuser $ECLIM_UID -c "$ECLIM -command shutdown";       fi ;;
+  restart) $0 stop && $0 start ;;
+  *) echo "Usage: $0 {start|stop|restart}" && exit 1 ;;
+esac
+
+exit 0
+

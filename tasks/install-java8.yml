@@ -1,0 +1,22 @@
+# Jessie backports repository activation
+
+- name:           Activate Jessie-backports
+  apt_repository: repo="deb http://httpredir.debian.org/debian jessie-backports main" mode=644 state=present
+  register:       backports
+
+- name:   Update apt cache
+  apt:    update_cache=yes
+  when:   backports.changed
+
+# Required packages installation
+
+- name: Install new packages
+  apt:  name={{ item }}
+  with_items: [ vim, xvfb, build-essential ]
+
+# Java8 installation
+
+- name: Install Java 8 using jessie-backports
+  apt:  name={{ item }} default_release=jessie-backports
+  with_items: [ openjdk-8-jre, openjdk-8-jdk ]
+

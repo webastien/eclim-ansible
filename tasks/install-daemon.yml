@@ -1,0 +1,16 @@
+- name: Check if {{ item }} daemon is already installed
+  stat: path="/etc/init.d/{{ item }}"
+  register: daemon
+
+- name: Install {{ item }} daemon
+  copy: src=../templates/{{ item }} dest=/etc/init.d/{{ item }} mode=0755
+  when: not daemon.stat.exists
+
+- name:  Activate {{ item }} daemon
+  shell: update-rc.d {{ item }} defaults
+  when:  not daemon.stat.exists
+
+- name:    Start the {{ item }} service
+  service: name={{ item }} state=started
+  when:    not daemon.stat.exists
+

@@ -1,0 +1,46 @@
+- name: Check if Eclim has already been installed in a previous provisioning
+  stat: path=/opt/eclipse/eclimd
+  register: eclim_installed
+
+- name:     Define the path where Eclim installer will be downloaded
+  set_fact: dlPath="{{ configuration.vm.dlFolder }}/eclim-installer.jar"
+  when:     not eclipse_installed.stat.exists
+
+- name: Check if Eclim installer has already been downloaded in a previous provisioning
+  stat: path="{{ dlPath }}"
+  when: not eclim_installed.stat.exists
+  register: eclim_downloaded
+
+- name:    Download Eclim installer
+  get_url: url="https://github.com/ervandew/eclim/releases/download/2.6.0/eclim_2.6.0.jar" dest="{{ dlPath }}"
+  when:    not eclim_installed.stat.exists and not eclim_downloaded.stat.exists
+
+# NOTE: Never use the tilde character for vim.files: It will not be replace by your home, but will create a '~' directory!
+- name:  Install Eclim
+  shell: java -Dvim.files={{ ansible_env.HOME }}/.vim -Declipse.home=/opt/eclipse -jar {{ dlPath }} install
+  when:  not eclim_installed.stat.exists
+
+- name: Configure Eclim workspace
+  lineinfile:
+    dest:        "{{ ansible_env.HOME }}/.eclimrc"
+    line:        osgi.instance.area.default=@user.home/www
+    create:      yes
+    insertafter: EOF
+  when: not eclim_installed.stat.exists
+
+- name: Configure Eclim default encoding
+  lineinfile:
+    dest:        "{{ ansible_env.HOME }}/.eclimrc"
+    line:        file.encoding=utf-8
+    create:      yes
+    insertafter: EOF
+  when: not eclim_installed.stat.exists
+
+- name: Configure VIm for Eclim
+  lineinfile:
+    dest:        "{{ ansible_env.HOME }}/.vimrc"
+    line:        let g:EclimTempFilesEnable=1 # Otherwise, Eclim plugin alter the file when using completion even if changes are reverted
+    create:      yes
+    insertafter: EOF
+  when: not eclim_installed.stat.exists
+
