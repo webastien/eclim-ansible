@@ -1,6 +1,6 @@
 # Eclim installation via Ansible (draft / unfinished)
 
-This unfinished Ansible role is a WIP, I'm not sure to complete one day. I publish it anyway because it could be a starting point to install [Eclim](http://eclim.org).
+This unfinished Ansible role is a WIP, I'm not sure to complete one day ([probably never](https://github.com/webastien/eclim-ansible/blob/master/README.md#why-i-decide-not-to-go-on-with)). I publish it anyway because it could be a starting point to install [Eclim](http://eclim.org).
 
 ## Important note
 
@@ -32,4 +32,4 @@ I've put some comments at the end of the taskfile, explaining how to test your i
 * Eclim allows a faster autocompletion than my current configuration on big project, but sometimes VIm freezes.
 * Eclim doesn't currently support the "jump to definition" feature for PHP (with `:PhpSearchContext`)
 * I had some bugs when complete variable names: The begin I typed disappears. I can deal with it, but it's boring.
-
+* I tried this because completion with ctags was slow on huge projets, but I've moved to [universal-ctags](http://ctags.io) which is incredibly faster.
